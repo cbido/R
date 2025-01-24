@@ -1,0 +1,38 @@
+
+library(ggplot2)
+library(gganimate)
+
+# Create the animated plot using box plots
+animated_plot <- ggplot(data, aes(x = education, y = lifesatisfaction)) +  
+  geom_boxplot(aes(fill = lifesatisfaction), alpha = 0.8, outlier.shape = 16, outlier.colour = "red") +  # Box plot with red outliers
+  scale_fill_manual(values = colors) +
+  theme_minimal(base_size = 16) +  # Modern minimal theme
+  labs(
+    title = "Relationship Between Subjective Well-being (SWB) and Education",
+    subtitle = "Education: Highest educational level attained",
+    x = "Education",
+    y = "Subjective Well-being (Life satisfaction)",
+    caption = "Data Source: WVS time series"
+  ) +
+  guides(fill = guide_legend(title = "SWB")) +  # Renaming legend title
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 22, face = "bold", color = "#2D3E50"),
+    plot.subtitle = element_text(hjust = 0.5, size = 16, face = "italic", color = "#4C5C6D"),
+    axis.title = element_text(size = 14, face = "bold", color = "#4C5C6D"),
+    axis.text = element_text(size = 12, color = "#4C5C6D"),
+    panel.grid.major = element_line(color = "#E1E8F0", size = 0.5),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(size = 10, color = "#A0B2C3", hjust = 1),
+    legend.position = "top",  # Move the legend to the top
+    legend.title = element_text(size = 14, face = "bold", color = "#4C5C6D"),
+    legend.text = element_text(size = 12, color = "#4C5C6D")
+  ) +
+  transition_time(yearnumeric) +  # Animate over the 'year' variable
+  labs(title = "Year: {frame_time}")  # Display the current year in the title
+
+# Render the animation
+animated_plot <- animate(animated_plot, nframes = length(unique(data$yearnumeric)), fps = 0.5)
+
+# Save the animation as a gif
+anim_save("Education_swb_boxplot_animation_invertedslow2.gif", animated_plot)
+
