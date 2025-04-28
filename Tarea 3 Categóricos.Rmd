@@ -1,0 +1,107 @@
+---
+title: "Tarea 3 Categórico"
+author: "Camila Bidó"
+date: "9/13/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+title: "SOC3070 Análisis de Datos Categóricos"
+author: "Tarea corta 3"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r, echo=FALSE, message=FALSE}
+# Escribir install.packages("tinytex") en la consola para instalar "tinytex"
+# Carga "tinytex" para compilar PDF
+library("tinytex")
+# Escribir install.packages("tidyverse") en la consola para instalar "tidyverse"
+library("tidyverse")
+```
+Ponderación: 6% de la nota final del curso. 
+En esta pregunta aplicarán propiedades de distribuciones de probabilidad discreta y Maximum Likelihood Estimation.
+
+*Estudiante:* Camila Bidó
+
+## Problema: 
+
+La última final de la Eurocopa -- Italia vs. Inglaterra --  se definió por penales. La tabla a continuación resume la información de la ronda de penales. La columna X registra los resultados de cada lanzamiento, donde $X_{i}=1$ indica que el jugador $i$ convirtió el penal y $X_{i}=0$ indica que el penal fue atajado o perdido.  
+
+
+| Jugador   	    | Equipo     | X: Resultado  |
+| --------------- | --------   | :--------: |
+| Berardi      	  | Italia   	 | 1          |
+| Kane         	  | Inglaterra | 1          |
+| Belotti      	  | Italia   	 | 0          |
+| Maguire      	  | Inglaterra | 1          |
+| Bonucci      	  | Italia   	 | 1          |
+| Rashford     	  | Inglaterra | 0          |
+| Bernardeschi 	  | Italia   	 | 1          |
+| Sancho       	  | Inglaterra | 0          |
+| Jorginho 	      | Italia     | 0          |
+| Saka         	  | Inglaterra | 0          |
+
+
+Asumiendo que el tiro de cada jugador no es afectado por los resultados en los tiros anteriores, es razonable sostener que el resultado de cada penal sigue una distribución Bernoulli. Formalmente:  $X_{i} \sim \text{Bernoulli}(p_{i})$, donde $p_{i}$ es la probabilidad de que cada jugador marque su penal.
+
+
+## Preguntas:
+
+1) Exprese la función de probabilidad de cada variables aleatoria $X_{i}$.
+
+La función de probabilidad de cada variables aleatoria, siguiendo una distribución Bernoulli, sería:
+
+$$f_{X}(X_{i}) = p^{X_{i}}(1-p)^{1-X_{i}}  \quad \text{si } X_{i}=1 \text{ o } X_{i}=0$$
+
+2) Asumiendo que todos los jugadores de un mismo equipo tienen la misma probabilidad de marcar su penal ($p$ para Italia y $q$ para Inglaterra), exprese la "Likelihood function" de $p$ y $q$.
+
+$$\mathcal{L}(p) = \mathbb{P}(x_{\text{Berardi}}, x_{\text{Belotti}}, x_{\text{Bonucci}}, x_{\text{Bernardeschi}}, x_{\text{Jorginho}} \mid p) = $$
+Para conocer la “Likelihood function” de $p$ pensamos en en el número de "éxitos" y el número "fracasos". En este caso, "éxito" = marcar un penal, y "fracaso" = no hacerlo. Tomando en cuenta que Italia tiene 3 penales y 5 intentos, sacamos que la función para identificar el likelihood function de $p$ es:
+
+$$\mathcal{L}(p \mid \text{ Datos}) =  f(x_{i}) =  p^{3}(1-p)^{5-3}$$
+$$\mathcal{L}(p \mid \text{ Datos}) =  f(x_{i}) =  p^{3}(1-p)^{2}$$
+
+Observando el caso de Inglaterra,
+
+$$\mathcal{L}(q) = \mathbb{P}(x_{\text{Kane}}, x_{\text{Maguire}}, x_{\text{Rashford}}, x_{\text{Sancho}}, x_{\text{Saka}} \mid q) =$$
+
+y, siguiendo esa misma lógica expresada arriba (5 intentos y 2 penales), tenemos que el likelihood function de $q$ es:
+
+$\mathcal{L}(q \mid \text{ Datos}) =  f(x_{i}) =  q^{2}(1-q)^{5-2}$
+
+$\mathcal{L}(q \mid \text{ Datos}) =  f(x_{i}) =  q^{2}(1-q)^{3}$
+
+3) Grafique las funciónes $\mathcal{L}(p)$ y $\mathcal{L}(q)$ ( $p$/$q$ en el eje-x y $\mathcal{L}(p)$/$\mathcal{L}(q)$ en el eje y).
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, fig.height=4, fig.width=5}
+mydata <- data_frame(p = seq(from = 0, to = 1, by=0.01), q = seq(from = 0, to = 1, by=0.01), 
+                     L_italia = ((p^3)*((1-p)^2)),
+                     L_inglaterra = ((q^2)*((1-q)^3)))
+plot <- ggplot(data = mydata) +
+        geom_path(aes(x = p, y=L_italia, colour="Italia"), size=1.5) +
+        geom_path(aes(x = q, y=L_inglaterra, colour="Inglaterra"), size=1.5) +
+        labs(y="Likelihood", x="probabilidad marcar penal", title="Likelihood function de p y q") +
+        scale_color_manual("",breaks=c("Italia","Inglaterra"), values=c("blue","red")) +
+        theme_bw() 
+print(plot)
+```
+
+4) Estime visualmente cuál es el valor de $p$ que maximiza $\mathcal{L}(p)$ y cuál es el valor de $q$ que maximiza $\mathcal{L}(q)$. Explique el significado de estos números.
+
+La siguiente fórmula:
+
+$$p = \frac{k}{n} = \frac{\sum x_{i}}{n}$$
+
+Nos dice que, para conocer el valor de $p$ que maximiza $\mathcal{L}(p)$ y el valor de $q$ que maximiza $\mathcal{L}(q)$, debemos dividir el número de "éxitos" ($k$) entre el número intentos ($n$). Estos números encontrados en la respuesta para cada uno de los países, nos ayudan a responder la pregunta: ¿Cuáles son los valores más *plausibles*. de los *parámetros* dado los *datos* que observamos? Para el caso de Italia, vemos que este valor es 0.6:
+
+$$p = \frac{3}{5} = 0.6$$
+En el caso de Inglaterra, es 0.4:
+
+$$p = \frac{2}{5} = 0.4$$
